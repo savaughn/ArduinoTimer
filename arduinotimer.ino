@@ -1,7 +1,11 @@
+/***************************
+ * Author: github/savaughn *
+ **************************/
+ 
 #include <LiquidCrystal.h>
 #include <Time.h>
 
-
+//Specify LCD pins on board
 LiquidCrystal lcd(7,8,9,10,11,12);
 
 int state = LOW;      //Default LOW
@@ -56,5 +60,10 @@ void loop(){
   lastState = state;
 }
 
-  
-
+/****************************************************************
+TODO: 1. Add mandatory hold period in transition from LOW to HIGH
+      2. Add LED HIGH/LOW indicators
+      3. Implement Timer
+      4. Display previous time
+      5. Implement scramble page  
+*******************************************************************/
