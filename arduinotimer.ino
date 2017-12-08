@@ -24,6 +24,9 @@ int lastState = LOW;  //Default HIGH
 int holdCount = 0;
 int reset = 1;
 int timer = 0;
+unsigned long time;
+unsigned long timeStart;
+unsigned long timeStop;
 
 void setup(){
   lcd.createChar(0, block);
@@ -51,20 +54,21 @@ void clearBlock(){
 void loop(){
    //Initial state LOW mandatory hold HIGH 1 second before state change to HIGH
     while (state == LOW && reset == 1){
+      time = millis();
        while (digitalRead(inputPin) == HIGH){
            lcd.setCursor(0,1);
            lcd.write(byte(0));
-          holdCount++;    //TODO: LED instead of count print
-          if(holdCount > 999){
+           
+          if (millis()- time > 550) {
           lcd.setCursor(0,0);
           lcd.write(byte(0));
         }
        }
-        if(holdCount < 1000){      //Button wasn't held long enough
-          holdCount = 0;           //reset state change timer
-      } else {      //Button was held long enough
-        state = HIGH;              //Change state
-        holdCount = 0;
+        if(millis() - time < 550){    //Button wasn't held long enough
+          time = millis();            //reset state change timer
+      } else {                        //Button was held long enough
+        state = HIGH;                 //Change state
+        timeStart = millis();
       }
     }
     
@@ -76,11 +80,11 @@ void loop(){
       reset = 1;
       clearTime(1);
       lcd.setCursor(6,1);
-      lcd.print(timer);
+      lcd.print(timeStop);
       clearLine(0);
      lcd.setCursor(6,0);
-     timer = 0;  
-      lcd.print(timer); 
+       
+      lcd.print(0); 
       clearBlock();
          
    }
@@ -89,7 +93,7 @@ void loop(){
       
       
       lcd.setCursor(6,0);
-      lcd.print(timer++);          //TODO: convert to TIME
+      lcd.print(millis() - timeStart);          
     
       //Keeps state HIGH until button is pushed
       if (lastState == HIGH && digitalRead(inputPin) == LOW ){
@@ -100,6 +104,7 @@ void loop(){
       else if (lastState == HIGH && digitalRead(inputPin) == HIGH ){
         state = LOW;
         reset = 0;        //prevents state change timer from starting from HIGH to LOW
+        timeStop = millis()-timeStart;
       }
       
       //track last state
