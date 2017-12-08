@@ -9,13 +9,13 @@
 LiquidCrystal lcd(7,8,9,10,11,12);
 
 byte block[8] = {
+  B00000,
+  B01110,
   B11111,
   B11111,
   B11111,
-  B11111,
-  B11111,
-  B11111,
-  B11111,
+  B01110,
+  B00000,
 };
 
 int state = LOW;      //Default LOW
