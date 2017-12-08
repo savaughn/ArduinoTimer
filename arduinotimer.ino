@@ -40,10 +40,10 @@ void print(int state){
   
   if (state == 0){
     lcd.setCursor(0,1); 
-    lcd.write(byte(0));
+    //lcd.write(byte(0));
   }else{
     lcd.setCursor(0,0);
-    lcd.write(byte(0));
+    //lcd.write(byte(0));
   }
 }
 
@@ -57,12 +57,19 @@ void clearTime(int line){
   lcd.print("        ");
 }
 
+void clearBlock(){
+ lcd.setCursor(0,1);
+   lcd.print(" "); 
+}
+
 void loop(){
    //Initial state LOW mandatory hold HIGH 1 second before state change to HIGH
     while (state == LOW && reset == 1){
        while (digitalRead(inputPin) == HIGH){
-        holdCount++;    //TODO: LED instead of count print
-        if(holdCount > 999){
+           lcd.setCursor(0,1);
+           lcd.write(byte(0));
+          holdCount++;    //TODO: LED instead of count print
+          if(holdCount > 999){
           lcd.setCursor(0,0);
           lcd.write(byte(0));
         }
@@ -72,7 +79,6 @@ void loop(){
       } else {      //Button was held long enough
         state = HIGH;              //Change state
         holdCount = 0;
-        clearLine(0);
       }
     }
     
@@ -82,9 +88,11 @@ void loop(){
         //do nothing
       }
       reset = 1;
+      clearTime(1);
       lcd.setCursor(6,1);
       lcd.print(timer);
       clearLine(0); 
+      clearBlock();
       timer = 0;     
    }
   
