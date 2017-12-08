@@ -28,11 +28,9 @@ int timer = 0;
 void setup(){
   lcd.createChar(0, block);
   lcd.begin(16,2);               //Initialize LCD
-  lcd.setCursor(0,0);            //Initialize Cursor
-  lcd.print("READY");  
-  delay(1000);
   lcd.clear();
-  print(digitalRead(inputPin));  //Print initial status
+  lcd.setCursor(6,0);
+  lcd.print(timer);  //Print initial status
 }
 
 void clearLine(int line){            //Because clear() can't work on just one line???
@@ -79,9 +77,12 @@ void loop(){
       clearTime(1);
       lcd.setCursor(6,1);
       lcd.print(timer);
-      clearLine(0); 
+      clearLine(0);
+     lcd.setCursor(6,0);
+     timer = 0;  
+      lcd.print(timer); 
       clearBlock();
-      timer = 0;     
+         
    }
   
     while(state == HIGH){
