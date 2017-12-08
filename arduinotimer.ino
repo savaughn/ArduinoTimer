@@ -35,15 +35,17 @@ void print(int state){
 }
 
 void loop(){
-   // if (reset == 0){
-    //  while (digitalRead(inputPin) == HIGH)
-   //       reset == 1; 
-    //      lcd.print("fdsjk");
-   // }
+   while (reset == 0){
+      while (digitalRead(inputPin) == HIGH){
+        //do nothing
+      }
+      reset = 1;         
+   }
   
     while (state == LOW && reset == 1){
        while (digitalRead(inputPin) == HIGH){
         lcd.setCursor(0,0);
+        lcd.clear();
          lcd.print(holdCount++);
        }
         if(holdCount < 1001){
