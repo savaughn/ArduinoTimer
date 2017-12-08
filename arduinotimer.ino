@@ -23,7 +23,6 @@ int inputPin = 2;     //Input location on board
 int lastState = LOW;  //Default HIGH
 int holdCount = 0;
 int reset = 1;
-int timer = 0;
 unsigned long time;
 unsigned long timeStart;
 unsigned long timeStop;
@@ -31,9 +30,7 @@ unsigned long timeStop;
 void setup(){
   lcd.createChar(0, block);
   lcd.begin(16,2);               //Initialize LCD
-  lcd.clear();
-  lcd.setCursor(6,0);
-  lcd.print(timer);  //Print initial status
+  initTime();                    //Print initial status
 }
 
 void clearLine(int line){            //Because clear() can't work on just one line???
@@ -49,6 +46,12 @@ void clearTime(int line){
 void clearBlock(){
  lcd.setCursor(0,1);
    lcd.print(" "); 
+}
+
+void initTime(){
+  clearLine(0);
+ lcd.setCursor(4,0);
+  lcd.print("00:00:00"); 
 }
 
 void loop(){
@@ -80,12 +83,9 @@ void loop(){
       reset = 1;
       clearTime(1);
       lcd.setCursor(6,1);
-      lcd.print(timeStop);
-      clearLine(0);
-     lcd.setCursor(6,0);
-       
-      lcd.print(0); 
-      clearBlock();
+      lcd.print(timeStop);       
+      initTime(); 
+      clearBlock();      //clears bottom block
          
    }
   
