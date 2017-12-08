@@ -67,9 +67,9 @@ void loop(){
           lcd.write(byte(0));
         }
        }
-        if(holdCount < 1001){      //Button wasn't held long enough
+        if(holdCount < 1000){      //Button wasn't held long enough
           holdCount = 0;           //reset state change timer
-      } if (holdCount > 999){      //Button was held long enough
+      } else {      //Button was held long enough
         state = HIGH;              //Change state
         holdCount = 0;
         clearLine(0);
@@ -84,7 +84,8 @@ void loop(){
       reset = 1;
       lcd.setCursor(6,1);
       lcd.print(timer);
-      clearLine(0);      
+      clearLine(0); 
+      timer = 0;     
    }
   
     while(state == HIGH){
@@ -115,8 +116,5 @@ void loop(){
 }
 
 /****************************************************************
-TODO: 2. Add LED HIGH/LOW indicators
-      3. Implement Timer
-      4. Display previous time
-      5. Implement scramble page  
+TODO: 5. Implement scramble page  
 *******************************************************************/
