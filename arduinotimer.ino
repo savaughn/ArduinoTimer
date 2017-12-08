@@ -8,14 +8,25 @@
 //Specify LCD pins on board
 LiquidCrystal lcd(7,8,9,10,11,12);
 
+byte block[8] = {
+  B11111,
+  B11111,
+  B11111,
+  B11111,
+  B11111,
+  B11111,
+  B11111,
+};
+
 int state = LOW;      //Default LOW
 int inputPin = 2;     //Input location on board
 int lastState = LOW;  //Default HIGH
 int holdCount = 0;
 int reset = 1;
+int timer = 0;
 
 void setup(){
-  
+  lcd.createChar(0, block);
   lcd.begin(16,2);               //Initialize LCD
   lcd.setCursor(0,0);            //Initialize Cursor
   lcd.print("READY");  
@@ -26,56 +37,81 @@ void setup(){
 
 //Print method defines states as HIGH or LOW
 void print(int state){
-  lcd.clear();
-  lcd.setCursor(6,1);
-  if (state == 0) 
-    lcd.print("LOW"); 
-  else
-    lcd.print("HIGH");
+  
+  if (state == 0){
+    lcd.setCursor(0,1); 
+    lcd.write(byte(0));
+  }else{
+    lcd.setCursor(0,0);
+    lcd.write(byte(0));
+  }
+}
+
+void clearLine(int line){            //Because clear() can't work on just one line???
+  lcd.setCursor(0, line);
+  lcd.print("                ");
+}
+
+void clearTime(int line){
+  lcd.setCursor(6,line);
+  lcd.print("        ");
 }
 
 void loop(){
    //Initial state LOW mandatory hold HIGH 1 second before state change to HIGH
     while (state == LOW && reset == 1){
        while (digitalRead(inputPin) == HIGH){
-        lcd.setCursor(0,0);
-         lcd.print(holdCount++);    //TODO: LED instead of count print
+        holdCount++;    //TODO: LED instead of count print
+        if(holdCount > 999){
+          lcd.setCursor(0,0);
+          lcd.write(byte(0));
+        }
        }
         if(holdCount < 1001){      //Button wasn't held long enough
           holdCount = 0;           //reset state change timer
       } if (holdCount > 999){      //Button was held long enough
         state = HIGH;              //Change state
         holdCount = 0;
+        clearLine(0);
       }
     }
     
     //Busy wait if from HIGH to LOW the button has not been let go
-    while (reset == 0){
+    while (state == LOW && reset == 0){
       while (digitalRead(inputPin) == HIGH){
         //do nothing
       }
-      reset = 1;         
+      reset = 1;
+      lcd.setCursor(6,1);
+      lcd.print(timer);
+      clearLine(0);      
    }
   
+    while(state == HIGH){
+      
+      
+      lcd.setCursor(6,0);
+      lcd.print(timer++);          //TODO: convert to TIME
     
-    //Keeps state HIGH until button is pushed
-    if (lastState == HIGH && digitalRead(inputPin) == LOW ){
-      state = HIGH;
+      //Keeps state HIGH until button is pushed
+      if (lastState == HIGH && digitalRead(inputPin) == LOW ){
+        state = HIGH;
+        }
+      
+      //Returns to LOW when button is pushed when already in HIGH state
+      else if (lastState == HIGH && digitalRead(inputPin) == HIGH ){
+        state = LOW;
+        reset = 0;        //prevents state change timer from starting from HIGH to LOW
       }
-    
-    //Returns to LOW when button is pushed when already in HIGH state
-    else if (lastState == HIGH && state == HIGH ){
-      state = LOW;
-      reset = 0;        //prevents state change timer from starting from HIGH to LOW
-    }
-    
-    //updates LCD when state change occurs
-    if (state != lastState){    
-      print(state);        
-    } 
-    
-    //track last state
-    lastState = state;
+      
+      //updates LCD when state change occurs
+      if (state != lastState){    
+        print(state);        
+      } 
+      
+      //track last state
+      lastState = state;
+  }
 }
 
 /****************************************************************
