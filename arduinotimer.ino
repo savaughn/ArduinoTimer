@@ -78,6 +78,7 @@ void loop(){
        }
         if(millis() - time < 550){    //Button wasn't held long enough
           time = millis();            //reset state change timer
+          clearBlocks();
       } else {                        //Button was held long enough
         state = HIGH;                 //Change state
         timeStart = millis();
@@ -94,8 +95,36 @@ void loop(){
    }
   
     while(state == HIGH){      
-      lcd.setCursor(6,0);
-      lcd.print(millis() - timeStart);          
+      
+      //lcd.print(millis() - timeStart); 
+      
+      unsigned long currentTime = (millis()-timeStart);
+      
+      unsigned long ms = currentTime%100;
+      int s = (currentTime/1000)%60;
+      int m = (currentTime/60000)%60;
+     //lcd.setCursor(4,1);
+     //lcd.print( m );
+     lcd.setCursor(10,0);
+     lcd.print( ms );
+     if (s < 10){
+       lcd.setCursor(7,0);
+       lcd.print(0);
+       lcd.setCursor(8,0);
+     }
+     else
+       lcd.setCursor(7,0);
+     lcd.print( s );
+     
+     if(m < 10){
+       lcd.setCursor(4,0);
+       lcd.print(0);
+       lcd.setCursor(5,0);
+       
+     }
+     else
+       lcd.setCursor(4,0);
+     lcd.print(m);
     
       //Keeps state HIGH until button is pushed
       if (lastState == HIGH && digitalRead(inputPin) == LOW ){
