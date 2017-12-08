@@ -60,6 +60,35 @@ void timeInit(){
   lcd.print("00:00:00"); 
 }
 
+void printTimer(unsigned long currentTime){
+ 
+   unsigned long ms = currentTime%100;
+      int s = (currentTime/1000)%60;
+      int m = (currentTime/60000)%60;
+      
+     lcd.setCursor(10,0);
+     lcd.print( ms );
+     if (s < 10){
+       lcd.setCursor(7,0);
+       lcd.print(0);
+       lcd.setCursor(8,0);
+     }
+     else
+       lcd.setCursor(7,0);
+     lcd.print( s );
+     
+     if(m < 10){
+       lcd.setCursor(4,0);
+       lcd.print(0);
+       lcd.setCursor(5,0);
+       
+     }
+     else
+       lcd.setCursor(4,0);
+     lcd.print(m);
+  
+}
+
 void loop(){
    //Initial state LOW mandatory hold HIGH 1 second before state change to HIGH
     while (state == LOW && reset == 1){
@@ -96,35 +125,9 @@ void loop(){
   
     while(state == HIGH){      
       
-      //lcd.print(millis() - timeStart); 
-      
-      unsigned long currentTime = (millis()-timeStart);
-      
-      unsigned long ms = currentTime%100;
-      int s = (currentTime/1000)%60;
-      int m = (currentTime/60000)%60;
-     //lcd.setCursor(4,1);
-     //lcd.print( m );
-     lcd.setCursor(10,0);
-     lcd.print( ms );
-     if (s < 10){
-       lcd.setCursor(7,0);
-       lcd.print(0);
-       lcd.setCursor(8,0);
-     }
-     else
-       lcd.setCursor(7,0);
-     lcd.print( s );
+      unsigned long currentTime = (millis()-timeStart);      
+      printTimer(currentTime);
      
-     if(m < 10){
-       lcd.setCursor(4,0);
-       lcd.print(0);
-       lcd.setCursor(5,0);
-       
-     }
-     else
-       lcd.setCursor(4,0);
-     lcd.print(m);
     
       //Keeps state HIGH until button is pushed
       if (lastState == HIGH && digitalRead(inputPin) == LOW ){
