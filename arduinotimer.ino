@@ -35,18 +35,6 @@ void setup(){
   print(digitalRead(inputPin));  //Print initial status
 }
 
-//Print method defines states as HIGH or LOW
-void print(int state){
-  
-  if (state == 0){
-    lcd.setCursor(0,1); 
-    //lcd.write(byte(0));
-  }else{
-    lcd.setCursor(0,0);
-    //lcd.write(byte(0));
-  }
-}
-
 void clearLine(int line){            //Because clear() can't work on just one line???
   lcd.setCursor(0, line);
   lcd.print("                ");
@@ -112,11 +100,6 @@ void loop(){
         state = LOW;
         reset = 0;        //prevents state change timer from starting from HIGH to LOW
       }
-      
-      //updates LCD when state change occurs
-      if (state != lastState){    
-        print(state);        
-      } 
       
       //track last state
       lastState = state;
