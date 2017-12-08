@@ -27,6 +27,7 @@ int count = 0;
 unsigned long time;
 unsigned long timeStart;
 unsigned long timeStop = 0;
+unsigned long timeBest;
 
 void setup(){
   lcd.createChar(0, block);
@@ -42,7 +43,7 @@ void clearLine(int line){            //Because clear() can't work on just one li
 
 void clearTime(int line){
   lcd.setCursor(6,line);
-  lcd.print("        ");
+  lcd.print("          ");
 }
 
 void clearBlocks(){
@@ -59,9 +60,9 @@ void drawBlock(int line){
 
 void timeInit(int line){
    lcd.setCursor(4,line);
-  lcd.print("00:00:00 ");
+  lcd.print("00:00:00    ");
  lcd.setCursor(4,line);
-  lcd.print("00:00:00 "); 
+  lcd.print("00:00:00    "); 
 }
 
 void printTimer(unsigned long currentTime, int line){
@@ -100,6 +101,7 @@ void loop(){
            drawBlock(1);  
            if(timeStop != 0){
              timeInit(0);
+             printTimer(timeStop, 1);
            }
                  
          if (millis()- time > 550) {
@@ -127,7 +129,7 @@ void loop(){
     while(state == HIGH){      
       
       unsigned long currentTime = (millis()-timeStart);      
-      if (count%4==0)
+      if (currentTime%9==0)
         printTimer(currentTime, 0);     
     
       //Keeps state HIGH until button is pushed
@@ -139,11 +141,16 @@ void loop(){
       else if (lastState == HIGH && digitalRead(inputPin) == HIGH ){
         
         timeStop = millis()-timeStart - debounce;
+        if(timeBest == 0)
+          timeBest = timeStop;
+        else if(timeStop < timeBest){
+          timeBest = timeStop;
+         lcd.setCursor(15,0);
+           lcd.write(byte(0));
+        }
+          
         state = LOW;
         reset = 0;        //prevents state change timer from starting from HIGH to LOW
-        //lcd.setCursor(6,0);
-        //lcd.print(timeStop);
-        printTimer(timeStop, 1);
       }
       
       //track last state
