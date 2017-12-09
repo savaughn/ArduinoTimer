@@ -1,7 +1,7 @@
 /***************************
  * Author: github/savaughn *
  **************************/
- 
+
 #include <LiquidCrystal.h>
 #include <Time.h>
 
@@ -52,9 +52,9 @@ void clearTime(int line){
 
 void clearBlocks(){
   lcd.setCursor(0,0);
-   lcd.print(" "); 
- lcd.setCursor(0,1);
-   lcd.print(" "); 
+  lcd.print(" "); 
+  lcd.setCursor(0,1);
+  lcd.print(" "); 
 }
 
 void drawBlock(int line){
@@ -63,145 +63,147 @@ void drawBlock(int line){
 }
 
 void timeInit(int line){
-   lcd.setCursor(4,line);
+  lcd.setCursor(4,line);
   lcd.print("00:00:00    ");
- lcd.setCursor(4,line);
+  lcd.setCursor(4,line);
   lcd.print("00:00:00    "); 
 }
 
 void printTimer(unsigned long currentTime, int line){
- 
-   unsigned long ms = currentTime%1000;
-      int s = (currentTime/1000)%60;
-      int m = (currentTime/60000)%60;
-      
-     lcd.setCursor(10,line);
-     lcd.print( ms );
-     if (s < 10){
-       lcd.setCursor(7,line);
-       lcd.print(0);
-       lcd.setCursor(8,line);
-     }
-     else
-       lcd.setCursor(7,line);
-     lcd.print( s );
-     
-     if(m < 10){
-       lcd.setCursor(4,line);
-       lcd.print(0);
-       lcd.setCursor(5,line);       
-     }
-     else
-       lcd.setCursor(4,line);
-     lcd.print(m);
-  
+
+  unsigned long ms = currentTime%1000;
+  int s = (currentTime/1000)%60;
+  int m = (currentTime/60000)%60;
+
+  lcd.setCursor(10,line);
+  lcd.print( ms );
+  if (s < 10){
+    lcd.setCursor(7,line);
+    lcd.print(0);
+    lcd.setCursor(8,line);
+  }
+  else
+    lcd.setCursor(7,line);
+  lcd.print( s );
+
+  if(m < 10){
+    lcd.setCursor(4,line);
+    lcd.print(0);
+    lcd.setCursor(5,line);       
+  }
+  else
+    lcd.setCursor(4,line);
+  lcd.print(m);
+
 }
 
 void cancelLast(){
   lcd.setCursor(15,2);
-       lcd.write(byte(0)); 
-       timeStop = 0;
-       timeInit(0);
+  lcd.write(byte(0)); 
+  timeStop = 0;
+  timeInit(0);
 }
 
 void sessionBest(unsigned long currentTime, unsigned long timePrev, unsigned long timeBest){
-       lcd.clear();
-       timeInit(1);
-       while(digitalRead(bestPin) == HIGH){          
-         lcd.setCursor(2,0);
-         lcd.print("Session Best");         
-         lcd.setCursor(6,1);
-         printTimer(timeBest, 1);
-       }
-       
-       lcd.clear();
-       timeInit(0);
-       timeInit(1);
-      printTimer(currentTime,0);
-     printTimer(timePrev, 1); 
+  lcd.clear();
+  timeInit(1);
+  while(digitalRead(bestPin) == HIGH){          
+    lcd.setCursor(2,0);
+    lcd.print("Session Best");         
+    lcd.setCursor(6,1);
+    printTimer(timeBest, 1);
+  }
+
+  lcd.clear();
+  timeInit(0);
+  timeInit(1);
+  printTimer(currentTime,0);
+  printTimer(timePrev, 1); 
 }
 
 void loop(){
-   //Waiting for user to start timer
-   while (state == LOW && reset == 1){
-      
-      //check for cancel button
-       if (digitalRead(cancelPin) == HIGH){
-        cancelLast();
+  //Waiting for user to start timer
+  while (state == LOW && reset == 1){
+
+    //check for cancel button
+    if (digitalRead(cancelPin) == HIGH){
+      cancelLast();
+    }
+
+    //check for session best button
+    if (digitalRead(bestPin) == HIGH){
+      sessionBest(currentTime, timePrev, timeBest);
+    }    
+
+    time = millis();
+    while (digitalRead(inputPin) == HIGH){         
+      drawBlock(1);  
+
+      //moves previous time to bottom row
+      if(timeStop != 0){
+        timeInit(0);
+        printTimer(timePrev, 1);
       }
-      
-      //check for session best button
-      if (digitalRead(bestPin) == HIGH){
-        sessionBest(currentTime, timePrev, timeBest);
-      }    
-      
-      time = millis();
-       while (digitalRead(inputPin) == HIGH){         
-           drawBlock(1);  
-           
-           //moves previous time to bottom row
-           if(timeStop != 0){
-             timeInit(0);
-             printTimer(timeStop, 1);
-           }
-                 
-         if (millis()- time > 550) {
-          drawBlock(0);
-        }
-       }
-       
-      if(millis() - time < 550){    //Button wasn't held long enough
-          time = millis();            //reset state change timer
-          clearBlocks();
-      } else {                        //Button was held long enough
-        state = HIGH;                 //Change state
-        timeStart = millis();
+
+      if (millis()- time > 550) {
+        drawBlock(0);
       }
     }
-    
-    //Busy wait if from HIGH to LOW the button has not been let go
-    while (state == LOW && reset == 0){
-      while (digitalRead(inputPin) == HIGH){
-        //do nothing
+
+    if(millis() - time < 550){    //Button wasn't held long enough
+      time = millis();            //reset state change timer
+      clearBlocks();
+    } 
+    else {                        //Button was held long enough
+      state = HIGH;                 //Change state
+      timeStart = millis();
+    }
+  }
+
+  //Busy wait if from HIGH to LOW the button has not been let go
+  while (state == LOW && reset == 0){
+    while (digitalRead(inputPin) == HIGH){
+      //do nothing
+    }
+    reset = 1;  
+    clearBlocks();         
+  }
+
+  //Timer is running  
+  while(state == HIGH){      
+    currentTime = (millis()-timeStart);  
+
+    //if (currentTime%9==0)
+    //  printTimer(currentTime, 0);     
+
+    //Keeps state HIGH until button is pushed
+    if (lastState == HIGH && digitalRead(inputPin) == LOW ){
+      state = HIGH;
+    }
+
+    //Returns to LOW when button is pushed when already in HIGH state
+    else if (lastState == HIGH && digitalRead(inputPin) == HIGH ){
+
+      timeStop = currentTime;
+      if(timeBest == 0)
+        timeBest = timeStop;
+      else if(timeStop < timeBest){
+        timeBest = timeStop;
+        lcd.setCursor(15,0);
+        lcd.write(byte(0));
       }
-      reset = 1;  
-      clearBlocks();         
-   }
-  
-      //Timer is running  
-      while(state == HIGH){      
-      currentTime = (millis()-timeStart);  
-      
-     if (currentTime%9==0)
-        printTimer(currentTime, 0);     
-    
-      //Keeps state HIGH until button is pushed
-      if (lastState == HIGH && digitalRead(inputPin) == LOW ){
-        state = HIGH;
-        }
-      
-      //Returns to LOW when button is pushed when already in HIGH state
-      else if (lastState == HIGH && digitalRead(inputPin) == HIGH ){
-        
-        timeStop = currentTime;
-        if(timeBest == 0)
-          timeBest = timeStop;
-        else if(timeStop < timeBest){
-          timeBest = timeStop;
-         lcd.setCursor(15,0);
-           lcd.write(byte(0));
-        }
-        timePrev = timeStop;  
-        state = LOW;
-        reset = 0;        //prevents state change timer from starting from HIGH to LOW
-      }
-      
-      //track last state
-      lastState = state;
-      count++;
+      timePrev = timeStop;  
+      state = LOW;
+      reset = 0;        //prevents state change timer from starting from HIGH to LOW
+    }
+
+    //track last state
+    lastState = state;
+    count++;
   }
 }
 
 /****************************************************************
-TODO: 5. Implement scramble page  
-*******************************************************************/
+ * TODO: 5. Implement scramble page  
+ *******************************************************************/
+
