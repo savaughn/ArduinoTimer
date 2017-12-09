@@ -29,6 +29,7 @@ unsigned long time;
 unsigned long timeStart;
 unsigned long timeStop = 0;
 unsigned long timeBest;
+unsigned long timeBestBak;
 unsigned long currentTime;
 unsigned long timePrev = 0;
 
@@ -99,7 +100,8 @@ void printTimer(unsigned long printTime, int line){
 void cancelLast(){
   lcd.setCursor(15,2);
   lcd.write(byte(0)); 
-  timeStop = 0;
+  if (timeStop == timeBest)
+    timeBest = timeBestBak;
   timeInit(0);
 }
 
@@ -161,6 +163,7 @@ void loop(){
     } 
     else {                        //Button was held long enough
       state = HIGH;                 //Change state
+      timeBestBak = timeBest;
       timeStart = millis();
     }
   }
