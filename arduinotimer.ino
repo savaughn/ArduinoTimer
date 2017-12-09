@@ -25,6 +25,7 @@ int bestPin = 4;
 int lastState = LOW;  //Default HIGH
 int reset = 1;
 int debounce = 4;     //Delay from pushbutton
+boolean canceled = false;
 unsigned long time;
 unsigned long timeStart;
 unsigned long timeStop = 0;
@@ -103,6 +104,7 @@ void cancelLast(){
   if (timeStop == timeBest)
     timeBest = timeBestBak;
   timeInit(0);
+  canceled = true;
 }
 
 void sessionBest(unsigned long timeStop,  unsigned long timePrev, unsigned long timeBest){
@@ -117,7 +119,10 @@ void sessionBest(unsigned long timeStop,  unsigned long timePrev, unsigned long 
   lcd.clear();
   timeInit(0);
   timeInit(1);
-  printTimer(timeStop,0);
+  if (!canceled)
+    printTimer(timeStop,0); 
+  //else
+  //  timeInit(0);
   printTimer(timePrev, 1); 
 }
 
@@ -158,12 +163,12 @@ void loop(){
     }
 
     if(millis() - time < 550){    //Button wasn't held long enough
-      time = millis();            //reset state change timer
       clearBlocks();
     } 
     else {                        //Button was held long enough
       state = HIGH;                 //Change state
       timeBestBak = timeBest;
+      canceled = false;
       timeStart = millis();
     }
   }
