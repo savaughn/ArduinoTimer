@@ -121,8 +121,8 @@ void sessionBest(unsigned long timeStop,  unsigned long timePrev, unsigned long 
   timeInit(1);
   if (!canceled)
     printTimer(timeStop,0); 
-  //else
-  //  timeInit(0);
+  else
+    timeInit(0);
   printTimer(timePrev, 1); 
 }
 
@@ -154,7 +154,8 @@ void loop(){
       
       //moves previous time to bottom row
       timeInit(0);
-      printTimer(timePrev, 1);
+      if(!canceled)
+        printTimer(timePrev, 1);
       
       //Draws top (go) block
       if (millis()- time > 550) {
