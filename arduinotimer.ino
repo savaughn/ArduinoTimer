@@ -20,6 +20,7 @@ byte block[8] = {
 
 int state = LOW;      //Default LOW
 int inputPin = 2;     //Input location on board
+int cancelPin = 3;
 int lastState = LOW;  //Default HIGH
 int reset = 1;
 int debounce = 4;     //Delay from pushbutton
@@ -95,8 +96,16 @@ void printTimer(unsigned long currentTime, int line){
 
 void loop(){
    //Initial state LOW mandatory hold HIGH 1 second before state change to HIGH
-    while (state == LOW && reset == 1){
+   while (state == LOW && reset == 1){
       time = millis();
+      
+       if (digitalRead(cancelPin) == HIGH){
+        lcd.setCursor(15,2);
+       lcd.write(byte(0)); 
+       timeStop = 0;
+       timeInit(0);
+      }
+      
        while (digitalRead(inputPin) == HIGH){
            drawBlock(1);  
            if(timeStop != 0){
@@ -108,6 +117,7 @@ void loop(){
           drawBlock(0);
         }
        }
+       
         if(millis() - time < 550){    //Button wasn't held long enough
           time = millis();            //reset state change timer
           clearBlocks();
@@ -127,9 +137,9 @@ void loop(){
    }
   
     while(state == HIGH){      
+      unsigned long currentTime = (millis()-timeStart);  
       
-      unsigned long currentTime = (millis()-timeStart);      
-      if (currentTime%9==0)
+     if (currentTime%9==0)
         printTimer(currentTime, 0);     
     
       //Keeps state HIGH until button is pushed
